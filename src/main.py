@@ -78,7 +78,7 @@ class WatchlistRunner:
                 },
                 json=data,
             )
-            if r.status_code == 200:
+            if r.ok:
                 print("success")
             else:
                 print("error: {}".format(r.text))
