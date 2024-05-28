@@ -1,4 +1,4 @@
-Request plex watchlists on overseerr.
+Push your plex watchlist to overseerr.
 
 ### Install
 `pip install -r requirement.txt`
