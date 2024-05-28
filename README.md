@@ -10,4 +10,4 @@ Multiple watchlist is supported by  using `,` as seperator: `WATCHLIST_URL="watc
 
 Watchlist urls can be found here: https://app.plex.tv/desktop/#!/settings/watchlist
 
-There is also an docker image avaiable at: `ghcr.io/lostb1t/overseersync:latest`
+There is also an docker image avaiable at: `ghcr.io/lostb1t/ghcr.io/lostb1t/overseerrwatchlist:latest`
