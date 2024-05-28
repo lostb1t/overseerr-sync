@@ -1,14 +1,8 @@
 import requests
 import os
 
-PLEX_TOKEN = "LKxyrJqXa59BxSyVox7C"
-PLEX_URL = "https://4887.pirately.cc"
 RSS_URL = "https://rss.plex.tv/ca89d3c6-543c-4a4d-a62e-4dcb45aed6c6"
 REQUEST_URL = "https://overseerr.blackbeard.shop/api/v1/request"
-
-# os.environ['HTTPS_PROXY'] = 'http://10.0.10.96:9090'
-# os.environ['HTTP_PROXY'] = 'http://10.0.10.96:9090'
-# r = requests.post('http://wikipedia.org', cookies=cookies)
 
 def request_rss(url):
     r = requests.get(
@@ -42,8 +36,6 @@ def process_items(items):
         if not tmdb:
             continue
 
-        # {"mediaId":65055,"tvdbId":272899,"mediaType":"tv","is4k":false,"seasons":[1]}
-
         mediaType = item["category"]
         if mediaType == "show":
             mediaType = "tv"
@@ -53,7 +45,6 @@ def process_items(items):
             data["tvdbId"] = tvdb
             data["seasons"] = "all"
 
-        # data = {"mediaId":65055,"tvdbId":272899,"mediaType":"tv","is4k":False,"seasons":"all"}
         r = requests.post(
             REQUEST_URL,
             headers={
@@ -64,4 +55,6 @@ def process_items(items):
             json=data,
         )
         print(r.json())
-        #break
+
+if __name__ == "__main__":
+    run()
