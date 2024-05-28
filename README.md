@@ -1,7 +1,7 @@
 Push your plex watchlist to overseerr.
 
 ### Install
-`pip install -r requirement.txt`
+`pip install -r requirements.txt`
 
 ### run script
 `EMAIL="myemail" PASSWORD="mypassword" WATCHLIST_URL="watchlisturl" python src/main.py`
