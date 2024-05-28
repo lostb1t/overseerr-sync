@@ -3,3 +3,5 @@ build:
 
 push:
 	docker push ghcr.io/lostb1t/overseerrwatchlist:latest
+
+publish: build push
