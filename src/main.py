@@ -1,7 +1,8 @@
 import requests
 import os
 
-RSS_URL = "https://rss.plex.tv/ca89d3c6-543c-4a4d-a62e-4dcb45aed6c6"
+RSS_URL = "https://rss.plex.tv/c74d1ad2-ca5f-4f97-8a87-6da8ceb846f3"
+RSS_URL_FRIENDS = "https://rss.plex.tv/ca89d3c6-543c-4a4d-a62e-4dcb45aed6c6"
 REQUEST_URL = "https://overseerr.blackbeard.shop/api/v1/request"
 
 def request_rss(url):
@@ -11,11 +12,12 @@ def request_rss(url):
     return  r.json()
 
 def run():
-    data = request_rss(RSS_URL)
-    process_items(data["items"])
-    if data["links"]["next"]:
-        data = request_rss(data["links"]["next"])
-        process_items(data["items"])   
+    for uri in [RSS_URL, RSS_URL_FRIENDS]:
+        data = request_rss(uri)
+        process_items(data["items"])
+        if data["links"]["next"]:
+            data = request_rss(data["links"]["next"])
+            process_items(data["items"])   
 
 def process_items(items):
 
