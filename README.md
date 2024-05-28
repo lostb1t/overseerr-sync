@@ -6,7 +6,7 @@ Push your plex watchlist to overseerr.
 ### run script
 `EMAIL="myemail" PASSWORD="mypassword" WATCHLIST_URL="watchlisturl" python src/main.py`
 
-Multiple watchlist is supported by  using `,` as seperator: `WATCHLIST_URL="watchlisturl,myfriendswatchlist"`
+Multiple watchlists are supported by using `,` as seperator: `WATCHLIST_URL="watchlisturl,myfriendswatchlist"`
 
 Watchlist urls can be found here: https://app.plex.tv/desktop/#!/settings/watchlist
 
