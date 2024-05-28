@@ -1,4 +1,5 @@
 import requests
+from requests.adapters import HTTPAdapter, Retry
 import os
 
 REQUEST_URL = "https://overseerr.blackbeard.shop/api/v1/request"
@@ -7,9 +8,16 @@ email = os.environ["EMAIL"]
 password = os.environ["PASSWORD"]
 watchlist_urls = os.environ["WATCHLIST_URL"].split(",")
 
+retry_strategy = Retry(
+    total=4,
+    status_forcelist=[429, 500, 502, 503, 504],
+)
+
+adapter = HTTPAdapter(max_retries=retry_strategy)
 
 class WatchlistRunner:
     cookie = None
+    session = None
 
     def login(self):
         r = requests.post(
@@ -22,12 +30,16 @@ class WatchlistRunner:
         return r
 
     def get_watchlist(self, url):
-        r = requests.get(
+        r = self.session.get(
             url, headers={"content-type": "application/json", "accept": "application/json"}
         )
         return  r.json()
 
     def run(self):
+        self.session = requests.Session()
+        self.session.mount('http://', adapter)
+        self.session.mount('https://', adapter)
+
         r = self.login()
 
         for uri in watchlist_urls:
@@ -38,7 +50,7 @@ class WatchlistRunner:
         data = self.get_watchlist(uri)
         # print(data)
         self.process_items(data["items"])
-        if data["links"]["next"]:
+        if 'next' in data["links"]:
             self.process(data["links"]["next"]) 
 
     def process_items(self, items):
@@ -69,7 +81,7 @@ class WatchlistRunner:
                 data["seasons"] = "all"
 
             print("requesting: {} ".format(item['title']), end='')
-            r = requests.post(
+            r = self.session.post(
                 REQUEST_URL,
                 headers={
                     "content-type": "application/json",
