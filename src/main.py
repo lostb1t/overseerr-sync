@@ -91,8 +91,10 @@ class WatchlistRunner:
 
             if media_type == "tv" and self.tv_quota_reached:
                 print("Series quota reached, skipping.")
+                continue
             if media_type == "movie" and self.movie_quota_reached:
                 print("Movie quota reached, skipping.")
+                continue
     
             media = self.get_media(tmdb, media_type)
             if "mediaInfo" in media and media["mediaInfo"]["status"] > 1:
