@@ -1,3 +1,4 @@
+import sys
 import requests
 from requests.adapters import HTTPAdapter, Retry
 import os
@@ -16,20 +17,26 @@ retry_strategy = Retry(
 adapter = HTTPAdapter(max_retries=retry_strategy)
 
 class WatchlistRunner:
-    cookie = None
     session = None
+    movie_quota_reached = False
+    tv_quota_reached = False
 
     def login(self):
-        r = requests.post(
+        r = self.session.post(
             "https://overseerr.blackbeard.shop/api/v1/auth/local", 
             headers={"content-type": "application/json", "accept": "application/json"}, 
             json={"email": email, "password": password}
         )
-        # print(r.cookies.get_dict())
-        self.cookie = r.headers["set-cookie"]
         return r
 
     def get_watchlist(self, url):
+        r = self.session.get(
+            url, headers={"content-type": "application/json", "accept": "application/json"}
+        )
+        return  r.json()
+
+    def get_media(self, id, media_type):
+        url = "https://overseerr.blackbeard.shop/api/v1/{}/{}".format(media_type, id)
         r = self.session.get(
             url, headers={"content-type": "application/json", "accept": "application/json"}
         )
@@ -48,13 +55,17 @@ class WatchlistRunner:
     def process(self, uri):
         print("--- Processing watchlist: {} ---".format(uri))
         data = self.get_watchlist(uri)
-        # print(data)
         self.process_items(data["items"])
+
         if 'next' in data["links"]:
             self.process(data["links"]["next"]) 
 
     def process_items(self, items):
         for item in items:
+            if self.tv_quota_reached and self.movie_quota_reached:
+                print("Quotas reached, ending run.")
+                sys.exit(0)
+
             if not item["guids"]:
                 continue
 
@@ -71,29 +82,50 @@ class WatchlistRunner:
             if not tmdb:
                 continue
 
-            mediaType = item["category"]
-            if mediaType == "show":
-                mediaType = "tv"
+            media_type = item["category"]
+            if media_type == "show":
+                media_type = "tv"
+                
 
-            data = {"mediaId": int(tmdb), "mediaType": mediaType, "is4k": False}
-            if mediaType == "tv":
+            print("{}: ".format(item['title']), end='')
+
+            if media_type == "tv" and self.tv_quota_reached:
+                print("Series quota reached, skipping.")
+            if media_type == "movie" and self.movie_quota_reached:
+                print("Movie quota reached, skipping.")
+    
+            media = self.get_media(tmdb, media_type)
+            if "mediaInfo" in media and media["mediaInfo"]["status"] > 1:
+                # already avaiable or requested
+                # todo: handle partial avaiable
+                print("Already avaiable/requested, skipping.")
+                continue
+                
+
+            data = {"mediaId": int(tmdb), "mediaType": media_type, "is4k": False}
+            if media_type == "tv":
                 data["tvdbId"] = tvdb
                 data["seasons"] = "all"
 
-            print("requesting: {} ".format(item['title']), end='')
+            print("requesting", end='')
+
             r = self.session.post(
                 REQUEST_URL,
                 headers={
                     "content-type": "application/json",
                     "accept": "application/json",
-                    "Cookie": self.cookie,
                 },
                 json=data,
             )
+            #print(r.status_code)
             if r.ok:
-                print("success")
+                print(" - success")
             else:
-                print("error: {}".format(r.text))
+                print(" - error: {}".format(r.text))
+                if r.json()["message"].lower() == "series quota exceeded.":
+                    self.tv_quota_reached = True
+                if r.json()["message"].lower() == "movie quota exceeded.":
+                    self.movie_quota_reached = True
 
 
 if __name__ == "__main__":
