@@ -39,13 +39,13 @@ class WatchlistRunner:
 
     def get_user(self):
         r = self.session.get(
-          "https://overseerr.blackbeard.shop/api/v1/auth/me", , headers={"content-type": "application/json", "accept": "application/json"}
+          "https://overseerr.blackbeard.shop/api/v1/auth/me", headers={"content-type": "application/json", "accept": "application/json"}
         )
         return  r.json()
         
     def get_quota(self, user_id):
         r = self.session.get(
-           "https://overseerr.blackbeard.shop/api/v1/user/{}/quota", , headers={"content-type": "application/json", "accept": "application/json"}
+           "https://overseerr.blackbeard.shop/api/v1/user/{}/quota", headers={"content-type": "application/json", "accept": "application/json"}
         )
         return  r.json()
 
