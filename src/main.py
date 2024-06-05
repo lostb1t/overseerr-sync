@@ -97,7 +97,8 @@ class WatchlistRunner:
                 continue
     
             media = self.get_media(tmdb, media_type)
-            if "mediaInfo" in media and media["mediaInfo"]["status"] > 1:
+            if (media_type == "movie" and "mediaInfo" in media and media["mediaInfo"]["status"] > 1)
+                or (media_type == "tv" and "mediaInfo" in media and media["mediaInfo"]["status"] == 5):
                 # already avaiable or requested
                 # todo: handle partial avaiable
                 print("Already avaiable/requested, skipping.")
@@ -105,12 +106,21 @@ class WatchlistRunner:
                 
 
             data = {"mediaId": int(tmdb), "mediaType": media_type, "is4k": False}
+            #if media_type == "tv":
+            #    data["tvdbId"] = tvdb
+            #    //data["seasons"] = "all"
+            
             if media_type == "tv":
-                data["tvdbId"] = tvdb
-                data["seasons"] = "all"
+                 data["tvdbId"] = tvdb
+                 seasons = []
+                 if "mediaInfo" in media:
+                   for s in media["mediaInfo"]["seasons"]:
+                      if s["status"] < 1
+                 else:
+                    seasons = "all"
 
             print("requesting", end='')
-
+            continue
             r = self.session.post(
                 REQUEST_URL,
                 headers={
