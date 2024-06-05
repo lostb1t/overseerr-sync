@@ -29,6 +29,7 @@ class WatchlistRunner:
             headers={"content-type": "application/json", "accept": "application/json"}, 
             json={"email": email, "password": password}
         )
+        self.user = self.get_user()
         return r
 
     def get_watchlist(self, url):
@@ -45,7 +46,7 @@ class WatchlistRunner:
         
     def get_quota(self, user_id):
         r = self.session.get(
-           "https://overseerr.blackbeard.shop/api/v1/user/{}/quota", headers={"content-type": "application/json", "accept": "application/json"}
+           "https://overseerr.blackbeard.shop/api/v1/user/{}/quota".format(user_id), headers={"content-type": "application/json", "accept": "application/json"}
         )
         return  r.json()
 
@@ -62,8 +63,7 @@ class WatchlistRunner:
         self.session.mount('https://', adapter)
 
         r = self.login()
-        self.user = self.get_user()
-        self.quota = self.get_quota(self.user["id"]
+        self.quota = self.get_quota(self.user["id"])
 
         for uri in watchlist_urls:
             self.process(uri)
@@ -78,7 +78,7 @@ class WatchlistRunner:
 
     def process_items(self, items):
         for item in items:
-            if self.quota["tv"]["remaining"] <= O and self.quota["movie"]["remaining"] <= 0:
+            if self.quota["tv"]["remaining"] <= 0 and self.quota["movie"]["remaining"] <= 0:
                 print("Quotas reached, ending run.")
                 sys.exit(0)
 
@@ -113,8 +113,7 @@ class WatchlistRunner:
                 continue
     
             media = self.get_media(tmdb, media_type)
-            if (media_type == "movie" and "mediaInfo" in media and media["mediaInfo"]["status"] > 1)
-                or (media_type == "tv" and "mediaInfo" in media and media["mediaInfo"]["status"] == 5):
+            if (media_type == "movie" and "mediaInfo" in media and media["mediaInfo"]["status"] > 1) or (media_type == "tv" and "mediaInfo" in media and media["mediaInfo"]["status"] == 5):
                 # already avaiable or requested
                 # todo: handle partial avaiable
                 print("Already avaiable/requested, skipping.")
@@ -129,19 +128,33 @@ class WatchlistRunner:
             if media_type == "tv":
                  data["tvdbId"] = tvdb
                  data["seasons"] = []
+                 requested_seasons = []
+                 existing_seasons = []
                  if "mediaInfo" in media:
                    for s in media["mediaInfo"]["seasons"]:
-                      if s["status"] == 1:
-                        data["seasons"].append(s["seasonNumber"])
-                        self.quota["tv"]["remaining"] -= 1
-                        if self.quota["tv"]["remaining"] <= 0:
-                            break
-                 else:
-                    data["seasons"] = "all"
+                     existing_seasons.append(s["seasonNumber"])
+                   for s in media["mediaInfo"]["requests"]["seasons"]:
+
+                      
+                      if s["seasonNumber"] < 1: continue
+                      requested_seasons.append(s["seasonNumber"])
+                      #if s["status"] == 1:
+                       # data["seasons"].append(s["seasonNumber"])
+                       # self.quota["tv"]["remaining"] -= 1
+                       # if self.quota["tv"]["remaining"] <= 0:
+                        #    break
+                 
+                   for s in media["seasons"]:
+                      if s["seasonNumber"] < 1: continue
+                      if s["seasonNumber"] in requested_seasons or s["seasonNumber"] in existing_seasons: continue
+                      data["seasons"].append(s["seasonNumber"])
+                      self.quota["tv"]["remaining"] -= 1
+                      if self.quota["tv"]["remaining"] <= 0:
+                        break
 
             print("requesting", end='')
-            print(data["seasons"])
-            continue
+            #print(data["seasons"])
+            #continue
             r = self.session.post(
                 REQUEST_URL,
                 headers={
