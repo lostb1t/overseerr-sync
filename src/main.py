@@ -112,14 +112,16 @@ class WatchlistRunner:
             
             if media_type == "tv":
                  data["tvdbId"] = tvdb
-                 seasons = []
+                 data["seasons"] = []
                  if "mediaInfo" in media:
                    for s in media["mediaInfo"]["seasons"]:
-                      if s["status"] < 1
+                      if s["status"] == 1:
+                        data["seasons"].append(s["seasonNumber"])
                  else:
-                    seasons = "all"
+                    data["seasons"] = "all"
 
             print("requesting", end='')
+            print(data["seasons"])
             continue
             r = self.session.post(
                 REQUEST_URL,
