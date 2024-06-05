@@ -78,7 +78,7 @@ class WatchlistRunner:
 
     def process_items(self, items):
         for item in items:
-            if self.tv_quota_reached and self.movie_quota_reached:
+            if self.quota["tv"]["remaining"] <= O and self.quota["movie"]["remaining"] <= 0:
                 print("Quotas reached, ending run.")
                 sys.exit(0)
 
@@ -105,10 +105,10 @@ class WatchlistRunner:
 
             print("{}: ".format(item['title']), end='')
 
-            if media_type == "tv" and self.tv_quota_reached:
+            if media_type == "tv" and self.quota["tv"]["remaining"] <= 0:
                 print("Series quota reached, skipping.")
                 continue
-            if media_type == "movie" and self.movie_quota_reached:
+            if media_type == "movie" and self.quota["movie"]["remaining"] <= 0:
                 print("Movie quota reached, skipping.")
                 continue
     
@@ -133,6 +133,9 @@ class WatchlistRunner:
                    for s in media["mediaInfo"]["seasons"]:
                       if s["status"] == 1:
                         data["seasons"].append(s["seasonNumber"])
+                        self.quota["tv"]["remaining"] -= 1
+                        if self.quota["tv"]["remaining"] <= 0:
+                            break
                  else:
                     data["seasons"] = "all"
 
@@ -150,12 +153,14 @@ class WatchlistRunner:
             #print(r.status_code)
             if r.ok:
                 print(" - success")
+                if media_type == "movie":
+                    self.quota["movie"]["remaining"] -= 1
             else:
                 print(" - error: {}".format(r.text))
                 if r.json()["message"].lower() == "series quota exceeded.":
-                    self.tv_quota_reached = True
+                    self.quota["tv"]["remaining"] == 0
                 if r.json()["message"].lower() == "movie quota exceeded.":
-                    self.movie_quota_reached = True
+                    self.self.quota["movie"]["remaining"] = 0
 
 
 if __name__ == "__main__":
