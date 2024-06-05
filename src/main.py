@@ -18,8 +18,10 @@ adapter = HTTPAdapter(max_retries=retry_strategy)
 
 class WatchlistRunner:
     session = None
-    movie_quota_reached = False
-    tv_quota_reached = False
+    user = None
+    quota = None
+    #movie_quota_reached = False
+    #tv_quota_reached = False
 
     def login(self):
         r = self.session.post(
@@ -32,6 +34,18 @@ class WatchlistRunner:
     def get_watchlist(self, url):
         r = self.session.get(
             url, headers={"content-type": "application/json", "accept": "application/json"}
+        )
+        return  r.json()
+
+    def get_user(self):
+        r = self.session.get(
+          "https://overseerr.blackbeard.shop/api/v1/auth/me", , headers={"content-type": "application/json", "accept": "application/json"}
+        )
+        return  r.json()
+        
+    def get_quota(self, user_id):
+        r = self.session.get(
+           "https://overseerr.blackbeard.shop/api/v1/user/{}/quota", , headers={"content-type": "application/json", "accept": "application/json"}
         )
         return  r.json()
 
@@ -48,6 +62,8 @@ class WatchlistRunner:
         self.session.mount('https://', adapter)
 
         r = self.login()
+        self.user = self.get_user()
+        self.quota = self.get_quota(self.user["id"]
 
         for uri in watchlist_urls:
             self.process(uri)
@@ -109,7 +125,7 @@ class WatchlistRunner:
             #if media_type == "tv":
             #    data["tvdbId"] = tvdb
             #    //data["seasons"] = "all"
-            
+            # remaining
             if media_type == "tv":
                  data["tvdbId"] = tvdb
                  data["seasons"] = []
