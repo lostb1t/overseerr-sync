@@ -137,7 +137,7 @@ class WatchlistRunner:
                  if "mediaInfo" in media:
                    for s in media["mediaInfo"]["seasons"]:
                      existing_seasons.append(s["seasonNumber"])
-                   for r in media["mediaInfo"]["requests"]["seasons"]:
+                   for r in media["mediaInfo"]["requests"]:
                      for s in r["seasons"]:
                         if s["seasonNumber"] < 1: continue
                         requested_seasons.append(s["seasonNumber"])
