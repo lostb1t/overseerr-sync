@@ -89,16 +89,16 @@ class WatchlistRunner:
             if not item["guids"]:
                 continue
 
-            tmdb = None
-            tvdb = None
+            #tmdb = item["externalIds"].get("imdbId", None)
+            #tvdb = item["externalIds"].get("tvdbId", None)
             for guid in item["guids"]:
                 if guid.startswith("tmdb"):
                     tmdb = int(guid.strip("tmdb://"))
-
-                if guid.startswith("tvdb"):
-                    tvdb = int(guid.strip("tvdb://"))
-                    break
-
+                    
+                #if guid.startswith("tvdb"):
+                #    tvdb = int(guid.strip("tvdb://"))
+        
+            #print(tvdb)
             if not tmdb:
                 continue
 
@@ -130,7 +130,8 @@ class WatchlistRunner:
             #    //data["seasons"] = "all"
             # remaining
             if media_type == "tv":
-                 data["tvdbId"] = tvdb
+                 #print(media["externalIds"])
+                 #data["tvdbId"] = media["externalIds"].get("tvdbId", None)
                  data["seasons"] = []
                  requested_seasons = []
                  existing_seasons = []
