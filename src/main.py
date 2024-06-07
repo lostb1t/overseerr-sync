@@ -147,15 +147,17 @@ class WatchlistRunner:
                        # if self.quota["tv"]["remaining"] <= 0:
                         #    break
                  
-                   for s in media["seasons"]:
-                      if s["seasonNumber"] < 1: continue
-                      if s["seasonNumber"] in requested_seasons or s["seasonNumber"] in existing_seasons: continue
-                      data["seasons"].append(s["seasonNumber"])
-                      self.quota["tv"]["remaining"] -= 1
-                      if self.quota["tv"]["remaining"] <= 0:
-                        break
+                 for s in media["seasons"]:
+                    if s["seasonNumber"] < 1: continue
+                    if s["seasonNumber"] in requested_seasons or s["seasonNumber"] in existing_seasons: continue
+                    data["seasons"].append(s["seasonNumber"])
+                    self.quota["tv"]["remaining"] -= 1
+                    if self.quota["tv"]["remaining"] <= 0:
+                      break
 
             print("requesting", end='')
+            if media_type == "tv":
+              print(" seasons ({})".format(data["seasons"]), end='')
             #print(data["seasons"])
             #continue
             r = self.session.post(
