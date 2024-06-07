@@ -20,6 +20,7 @@ class WatchlistRunner:
     session = None
     user = None
     quota = None
+    item_count = 0
     #movie_quota_reached = False
     #tv_quota_reached = False
 
@@ -66,6 +67,7 @@ class WatchlistRunner:
         self.quota = self.get_quota(self.user["id"])
 
         for uri in watchlist_urls:
+            #self.item_count = 0
             self.process(uri)
 
     def process(self, uri):
@@ -77,6 +79,8 @@ class WatchlistRunner:
             self.process(data["links"]["next"]) 
 
     def process_items(self, items):
+        #self.item_count += len(items)
+        #print(self.item_count)
         for item in items:
             if self.quota["tv"]["remaining"] <= 0 and self.quota["movie"]["remaining"] <= 0:
                 print("Quotas reached, ending run.")
@@ -102,7 +106,7 @@ class WatchlistRunner:
             if media_type == "show":
                 media_type = "tv"
                 
-
+            #continue
             print("{}: ".format(item['title']), end='')
 
             if media_type == "tv" and self.quota["tv"]["remaining"] <= 0:
@@ -133,11 +137,10 @@ class WatchlistRunner:
                  if "mediaInfo" in media:
                    for s in media["mediaInfo"]["seasons"]:
                      existing_seasons.append(s["seasonNumber"])
-                   for s in media["mediaInfo"]["requests"]["seasons"]:
-
-                      
-                      if s["seasonNumber"] < 1: continue
-                      requested_seasons.append(s["seasonNumber"])
+                   for r in media["mediaInfo"]["requests"]["seasons"]:
+                     for s in r["seasons"]:
+                        if s["seasonNumber"] < 1: continue
+                        requested_seasons.append(s["seasonNumber"])
                       #if s["status"] == 1:
                        # data["seasons"].append(s["seasonNumber"])
                        # self.quota["tv"]["remaining"] -= 1
