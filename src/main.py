@@ -123,6 +123,13 @@ class WatchlistRunner:
                 print("Already avaiable/requested, skipping.")
                 continue
                 
+            if "mediaInfo" in media and "requests" in media["mediaInfo"]:
+                if len(media["mediaInfo"]["requests"]) != 0:
+                  print("Already requested in the past, skipping.")
+                  continue
+                    
+                #for r in media["mediaInfo"]["requests"]:
+                #  if r[""]
 
             data = {"mediaId": int(tmdb), "mediaType": media_type, "is4k": False}
             #if media_type == "tv":
